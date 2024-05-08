@@ -3,12 +3,15 @@
 #ifndef BST_H
 #define BST_H
 
+
 // Event structure
 typedef struct {
     char name[50];
-    char startTime[6]; // Assuming HH:MM format
-    char endTime[6];   // Assuming HH:MM format
+    char startTime[6];
+    char endTime[6];
+    char state[10]; // Add state member to track the task state
 } Event;
+
 
 // Node structure
 typedef struct Node {

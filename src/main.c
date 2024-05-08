@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h> // For sleep function
 #include <time.h>
-#include <unistd.h>
 #include "bst.h"
 #include "json_parser.h"
 
@@ -18,6 +18,17 @@ void getCurrentTime(char *currentTime) {
     time_t now = time(NULL);
     struct tm* current_time = localtime(&now);
     strftime(currentTime, 6, "%H:%M", current_time);
+}
+
+// Function to print responses based on task state
+void printResponse(const char *eventName, const char *state) {
+    if (strcmp(state, "done") == 0) {
+        printf("Chill, you already did %s.\n", eventName);
+    } else if (strcmp(state, "undone") == 0) {
+        printf("Are you in the middle of %s?  Or yet to do it!!(yes/no)\n", eventName);
+    } else {
+        printf("Invalid task state for %s: %s\n", eventName, state);
+    }
 }
 
 int main() {
@@ -50,11 +61,22 @@ int main() {
             // Search for events based on current time
             Node* eventNode = searchEventAtTime(root, currentTime);
             if (eventNode != NULL) {
-                printf("Current Event: %s\n", eventNode->event.name);
-                printf("Start Time: %s\n", eventNode->event.startTime);
-                printf("End Time: %s\n", eventNode->event.endTime);
-                // Add a 3-second interval
-                sleep(3);
+                // Print response and ask for user's confirmation
+                printResponse(eventNode->event.name, eventNode->event.state);
+                
+                // Prompt for user's response
+                char response[10];
+                fgets(response, sizeof(response), stdin);
+                if (strcmp(response, "yes\n") == 0) {
+                    // Handle 'yes' response
+                    // For example, update the state of the event to "done"
+                } else if (strcmp(response, "no\n") == 0) {
+                    // Handle 'no' response
+                    // For example, keep the state of the event as "undone"
+                } else {
+                    printf("Invalid response. Please enter 'yes' or 'no'.\n");
+                }
+                sleep(3); // Wait for 3 seconds
             } else {
                 printf("No event scheduled at the current time.\n");
             }
@@ -62,11 +84,8 @@ int main() {
             // Search for events based on user-specified time
             Node* eventNode = searchEventAtTime(root, input);
             if (eventNode != NULL) {
-                printf("Event: %s\n", eventNode->event.name);
-                printf("Start Time: %s\n", eventNode->event.startTime);
-                printf("End Time: %s\n", eventNode->event.endTime);
-                // Add a 3-second interval
-                sleep(3);
+                printResponse(eventNode->event.name, eventNode->event.state);
+                sleep(3); // Wait for 3 seconds
             } else {
                 printf("No event scheduled at the specified time.\n");
             }

@@ -59,16 +59,18 @@ Node* parseEventsFromJSON(const char* filename) {
         char eventName[50];
         char startTime[6];
         char endTime[6];
-        if (sscanf(line, " {\"name\": \"%49[^\"]\", \"startTime\": \"%5[^\"]\", \"endTime\": \"%5[^\"]\"},", eventName, startTime, endTime) == 3) {
+        char state[10];
+        if (sscanf(line, " {\"name\": \"%49[^\"]\", \"startTime\": \"%5[^\"]\", \"endTime\": \"%5[^\"]\", \"state\": \"%7[^\"]\"},", eventName, startTime, endTime, state) == 4) {
             // Create an Event struct
             Event event;
             strcpy(event.name, eventName);
             strcpy(event.startTime, startTime);
             strcpy(event.endTime, endTime);
+            strcpy(event.state, state);
 
             // Insert the event into BST
             root = insert(root, event);
-            printf("Inserted event: %s, %s - %s\n", event.name, event.startTime, event.endTime);
+            printf("Inserted event: %s, %s - %s, State: %s\n", event.name, event.startTime, event.endTime, event.state);
         } else {
             fprintf(stderr, "Error: Invalid event format in JSON file.\n");
         }
