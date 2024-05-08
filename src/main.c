@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 #include "bst.h"
 #include "json_parser.h"
 
@@ -52,6 +53,8 @@ int main() {
                 printf("Current Event: %s\n", eventNode->event.name);
                 printf("Start Time: %s\n", eventNode->event.startTime);
                 printf("End Time: %s\n", eventNode->event.endTime);
+                // Add a 3-second interval
+                sleep(3);
             } else {
                 printf("No event scheduled at the current time.\n");
             }
@@ -62,6 +65,8 @@ int main() {
                 printf("Event: %s\n", eventNode->event.name);
                 printf("Start Time: %s\n", eventNode->event.startTime);
                 printf("End Time: %s\n", eventNode->event.endTime);
+                // Add a 3-second interval
+                sleep(3);
             } else {
                 printf("No event scheduled at the specified time.\n");
             }
