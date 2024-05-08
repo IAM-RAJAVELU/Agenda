@@ -120,3 +120,36 @@ Node* searchEventInRange(Node* root, const char* startTime, const char* endTime)
     }
 }
 
+// Function to get the next event node in the BST
+Node* getNextEventNode(Node* root, const char* currentTime) {
+    // Base case: if the tree is empty or the current node is NULL
+    if (root == NULL) {
+        return NULL;
+    }
+
+    // Convert currentTime to minutes since midnight for easier comparison
+    int currentHour, currentMinute;
+    sscanf(currentTime, "%d:%d", &currentHour, &currentMinute);
+    int currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+    // Traverse the BST to find the next event node
+    Node* nextNode = NULL;
+    while (root != NULL) {
+        // Convert event start time to minutes since midnight for comparison
+        int eventStartTimeHour, eventStartTimeMinute;
+        sscanf(root->event.startTime, "%d:%d", &eventStartTimeHour, &eventStartTimeMinute);
+        int eventStartTimeInMinutes = eventStartTimeHour * 60 + eventStartTimeMinute;
+
+        // If the event start time is after the current time, update nextNode and move to the left subtree
+        if (eventStartTimeInMinutes > currentTimeInMinutes) {
+            nextNode = root;
+            root = root->left;
+        }
+        // Otherwise, move to the right subtree
+        else {
+            root = root->right;
+        }
+    }
+
+    return nextNode;
+}

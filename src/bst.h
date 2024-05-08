@@ -27,5 +27,7 @@ Node* searchEventAtTime(Node* root, const char* currentTime);
 Node* searchEventInRange(Node* root, const char* startTime, const char* endTime);
 void inOrderTraversal(Node* root);
 void destroyTree(Node* root);
+Node* getNextEventNode(Node* root, const char* currentTime);
+
 
 #endif

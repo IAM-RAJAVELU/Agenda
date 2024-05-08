@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h> // For sleep function
 #include <time.h>
 #include "bst.h"
 #include "json_parser.h"
@@ -35,7 +34,7 @@ void printResponse(const char *eventName, const char *state) {
 void updateEventState(Node* eventNode) {
     // Print the event details and prompt the user for input
     printResponse(eventNode->event.name, eventNode->event.state);
-      // If event state is already 'done' or 'chill', no need to prompt again
+    // If event state is already 'done' or 'chill', no need to prompt again
     if (strcmp(eventNode->event.state, "done") == 0 || strcmp(eventNode->event.state, "Chill") == 0) {
         return;
     }
@@ -53,7 +52,33 @@ void updateEventState(Node* eventNode) {
         printf("Invalid response. Please enter 'yes' or 'no'.\n");
     }
 }
+// Function to calculate the time difference between two times in minutes
+int timeDifferenceInMinutes(const char* startTime, const char* endTime) {
+    int startHour, startMinute, endHour, endMinute;
+    sscanf(startTime, "%d:%d", &startHour, &startMinute);
+    sscanf(endTime, "%d:%d", &endHour, &endMinute);
+    
+    int startTotalMinutes = startHour * 60 + startMinute;
+    int endTotalMinutes = endHour * 60 + endMinute;
 
+    return endTotalMinutes - startTotalMinutes;
+}
+
+// Function to print reminders for events starting soon
+void checkEventReminders(Node* root, const char* currentTime, int reminderMinutes) {
+    Node* currentNode = root;
+    while (currentNode != NULL) {
+        Event currentEvent = currentNode->event;
+        
+        // Calculate time difference for event start
+        int startDifference = timeDifferenceInMinutes(currentTime, currentEvent.startTime);
+        if (startDifference > 0 && startDifference <= reminderMinutes) {
+            printf("Reminder: Event '%s' is starting in %d minutes.\n", currentEvent.name, startDifference);
+        }
+        
+        currentNode = getNextEventNode(root, currentEvent.endTime);
+    }
+}
 
 int main() {
     // Display current date and time
@@ -100,6 +125,11 @@ int main() {
                 printf("No event scheduled at the specified time.\n");
             }
         }
+
+        // Check for reminders
+        char currentTime[6];
+        getCurrentTime(currentTime);
+        checkEventReminders(root, currentTime, 10); // Check for events starting in 10 minutes
     }
 
     // Free memory allocated for BST
