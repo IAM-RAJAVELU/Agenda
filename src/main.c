@@ -35,7 +35,10 @@ void printResponse(const char *eventName, const char *state) {
 void updateEventState(Node* eventNode) {
     // Print the event details and prompt the user for input
     printResponse(eventNode->event.name, eventNode->event.state);
-    
+      // If event state is already 'done' or 'chill', no need to prompt again
+    if (strcmp(eventNode->event.state, "done") == 0 || strcmp(eventNode->event.state, "Chill") == 0) {
+        return;
+    }
     char response[10];
     fgets(response, sizeof(response), stdin);
     if (strcmp(response, "yes\n") == 0) {
@@ -50,6 +53,7 @@ void updateEventState(Node* eventNode) {
         printf("Invalid response. Please enter 'yes' or 'no'.\n");
     }
 }
+
 
 int main() {
     // Display current date and time
