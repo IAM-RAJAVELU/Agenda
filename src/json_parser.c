@@ -1,37 +1,65 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "json_parser.h"
-
-#define MAX_LINE_LENGTH 100
-#define MAX_EVENT_NAME_LENGTH 50
-#define TIME_FORMAT_LENGTH 6
 
 Node* parseEventsFromJSON(const char* filename) {
     // Open the JSON file
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
         fprintf(stderr, "Error: Unable to open file %s\n", filename);
-        perror("Error");
         return NULL;
     }
 
-    // Read events from JSON file and insert them into BST
+    // Read the JSON file line by line
+    char line[512]; // Assuming each line in JSON file is at most 512 characters
+    char day[20];    // Buffer to store the day of the week
     Node* root = NULL;
-    char line[MAX_LINE_LENGTH];
-    int lineNum = 0;
 
+    // Get today's day of the week
+    time_t t = time(NULL);
+    struct tm* current_time = localtime(&t);
+    strftime(day, sizeof(day), "%A", current_time);
+    printf("Today is %s\n", day);
+
+    // Look for today's events in the JSON data
+    int isDayFound = 0;
     while (fgets(line, sizeof(line), file) != NULL) {
-        lineNum++;
+        // Check if the line contains today's day of the week
+        if (strstr(line, day) != NULL) {
+            isDayFound = 1;
+            printf("Found events for %s\n", day);
+            break;
+        }
+    }
 
-        // Parse the JSON line and extract event details
-        char eventName[MAX_EVENT_NAME_LENGTH];
-        char startTime[TIME_FORMAT_LENGTH];
-        char endTime[TIME_FORMAT_LENGTH];
+    if (!isDayFound) {
+        fprintf(stderr, "Error: Today's events not found in JSON file.\n");
+        fclose(file);
+        return NULL;
+    }
 
-        int result = sscanf(line, "{\"name\": \"%49[^\"]\", \"startTime\": \"%5[^\"]\", \"endTime\": \"%5[^\"]\"}", eventName, startTime, endTime);
+    // Parse today's events from JSON
+    while (fgets(line, sizeof(line), file) != NULL) {
+        // Check if the line contains the start of an event array
+        if (strstr(line, "[") != NULL) {
+            break;
+        }
+    }
 
-        if (result == 3) {
+    // Parse events and insert them into BST
+    while (fgets(line, sizeof(line), file) != NULL) {
+        // Check if the line contains the end of the event array
+        if (strstr(line, "]") != NULL) {
+            break;
+        }
+
+        // Parse event details
+        char eventName[50];
+        char startTime[6];
+        char endTime[6];
+        if (sscanf(line, " {\"name\": \"%49[^\"]\", \"startTime\": \"%5[^\"]\", \"endTime\": \"%5[^\"]\"},", eventName, startTime, endTime) == 3) {
             // Create an Event struct
             Event event;
             strcpy(event.name, eventName);
@@ -40,8 +68,9 @@ Node* parseEventsFromJSON(const char* filename) {
 
             // Insert the event into BST
             root = insert(root, event);
+            printf("Inserted event: %s, %s - %s\n", event.name, event.startTime, event.endTime);
         } else {
-            fprintf(stderr, "Error: Invalid JSON format in file %s, line %d\n", filename, lineNum);
+            fprintf(stderr, "Error: Invalid event format in JSON file.\n");
         }
     }
 
